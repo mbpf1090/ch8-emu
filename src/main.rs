@@ -54,7 +54,5 @@ fn main() {
     }
 
     // run instructions
-    for instruction in rom.chunks(2) {
-        opcode_instructions::run_opcode(&instruction, &mut chip8);
-    }
+    chip8.run()
 }

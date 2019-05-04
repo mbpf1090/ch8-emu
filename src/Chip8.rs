@@ -1,9 +1,12 @@
+use std::collections::VecDeque;
+use super::opcode_instructions;
+
 const COLUMNS: usize = 4;
 const ROWS: usize = 8;
 
 pub struct Chip8 {
     ram: [u8; 4096],
-    stack: [u8; 24],
+    pub stack: VecDeque<u16>,
     register: [u8; 16],
     i: u16,
     display_buffer: [u8; 32],
@@ -14,7 +17,7 @@ impl Chip8 {
     pub fn new() -> Chip8{
         Chip8 {
             ram: [0; 4096],
-            stack: [0; 24],
+            stack: VecDeque::with_capacity(16),
             register: [0; 16],
             i: 0,
             display_buffer: [0; 32],
@@ -77,5 +80,13 @@ impl Chip8 {
             }
             print!("\n");
     }
+    }
+
+    pub fn run(&mut self) {
+        self.pc = 0x200;
+        loop {
+            let chunks: [u8; 2] = [self.ram[(self.pc as usize)], self.ram[(self.pc as usize + 1)]];
+            opcode_instructions::run_opcode(&chunks, self);   
+        }
     }
 }
