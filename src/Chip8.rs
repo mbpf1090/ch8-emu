@@ -13,6 +13,9 @@ const SLEEP_TIME: u64 = 1;
 const RAM_SIZE: usize = 4096;
 const REGISTER_SIZE: usize = 16;
 const STACK_SIZE: usize = 24;
+const PROGRAMM_START: u16 = 0x200;
+const WHITE: u32 = 0xFFFFFF;
+const BLACK: u32 = 0x000000;
 
 pub struct Chip8 {
     ram: [u8; 4096],
@@ -130,12 +133,6 @@ impl Chip8 {
 
 
     // Display
-    pub fn clear_display(&mut self) {
-        for pixel in 0..self.display_buffer.len() {
-            self.display_buffer[pixel] = 0;
-        }
-    }
-
     pub fn clear_window(&mut self) {
         for pixel in 0..self.window_buffer.len() {
             self.window_buffer[pixel] = 0;
@@ -155,13 +152,13 @@ impl Chip8 {
             let index = Chip8::get_index(x, y + 7 - i);
             let window_bit = self.window_buffer[index];
 
-            if (bit == 1) & (window_bit == 1) {
-                self.window_buffer[index] = 0x000000;
+            if (bit == 1) && (window_bit == 1) {
+                self.window_buffer[index] = BLACK;
                 swapped = 0b1;
             } else if bit == 1 {
-                self.window_buffer[index] = 0xFFFFFF;
+                self.window_buffer[index] = WHITE;
             } else {
-                self.window_buffer[index ] = 0x000000;
+                self.window_buffer[index ] = BLACK;
             }
         }
         self.write_register(0xF, swapped);
@@ -197,9 +194,9 @@ impl Chip8 {
 
     // Run
     pub fn run(&mut self) {
-        let debug = false;
+        let debug = true;
         let sleep_time = time::Duration::from_millis(SLEEP_TIME);
-        self.pc = 0x200;
+        self.pc = PROGRAMM_START;
         if debug {
             while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
                 self.window.update_with_buffer(&self.window_buffer).unwrap();
