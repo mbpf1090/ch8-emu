@@ -1,6 +1,6 @@
-use super::Chip8;
+use super::chip8;
 
-pub fn run_opcode(chunk: &[u8], chip8: &mut Chip8::Chip8){
+pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
 
     if chunk[0] == 0 && chunk[1] == 0 {
                 println!("EMPTY");

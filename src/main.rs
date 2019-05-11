@@ -3,7 +3,7 @@ use std::io::{Read, Error};
 use std::env;
 
 mod opcode_instructions;
-mod Chip8;
+mod chip8;
 mod font;
 
 fn read_rom(file_path: &str) -> Result<Vec<u8>, Error> {
@@ -33,7 +33,7 @@ fn main() {
         Err(error) => panic!("There was a problem opening the file: {:?}", error)
     };
 
-    let mut chip8 = Chip8::Chip8::new();
+    let mut chip8 = chip8::Chip8::new();
 
     // load fonts
     let fonts = font::Fonts::new();

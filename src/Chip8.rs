@@ -101,7 +101,7 @@ impl Chip8 {
     pub fn write_sprite(&mut self, sprite: &u8, x: u8, y: u8) {
         let columns: usize = 64;
         let mask = 0b0000001;
-        for i in (0..8) {
+        for i in 0..8 {
             if sprite >> i  & mask == 0b1 {
                 self.display_buffer[(x as usize) * columns + (y as usize + i)] = 1;
             } else {
