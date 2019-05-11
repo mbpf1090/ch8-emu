@@ -1,6 +1,8 @@
 pub fn get_opcode(chunk: &[u8]) -> String {
-
-    if chunk[0] == 0 && chunk[1] == 0 {
+        if chunk.len() < 2 {
+                String::from("END")
+        }
+        if chunk[0] == 0 && chunk[1] == 0 {
                 let opcode = String::from("EMPTY");
                 return opcode;
             }

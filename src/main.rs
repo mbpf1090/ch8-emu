@@ -16,10 +16,6 @@ fn read_rom(file_path: &str) -> Result<Vec<u8>, Error> {
 
 
 fn main() {
-    //constants
-    const RAM_SIZE: usize = 4096;
-    const REGISTER_SIZE: usize = 16;
-    const STACK_SIZE: usize = 24;
 
     // get args
     let mut args = env::args();
@@ -39,9 +35,6 @@ fn main() {
 
     let mut chip8 = Chip8::Chip8::new();
 
-
-    let rom_size = rom.len();
-
     // load fonts
     let fonts = font::Fonts::new();
     for (index, data) in fonts.fonts.iter().enumerate() {
@@ -52,6 +45,8 @@ fn main() {
     for (index, item) in rom.iter().enumerate() {
         chip8.write_ram(0x200 + index as u16,  *item);
     }
+    
+    println!("{:?}", chip8);   
 
     // run instructions
     chip8.run()
