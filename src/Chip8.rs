@@ -7,22 +7,21 @@ use super::opcode_instructions;
 
 use minifb::{Key, WindowOptions, Window, Scale, KeyRepeat};
 
-const COLUMNS: usize = 64;
-const ROWS: usize = 32;
-const SLEEP_TIME: u64 = 1;
-const RAM_SIZE: usize = 4096;
-const REGISTER_SIZE: usize = 16;
-const STACK_SIZE: usize = 24;
-const PROGRAMM_START: u16 = 0x200;
-const WHITE: u32 = 0xFFFFFF;
-const BLACK: u32 = 0x000000;
+const COLUMNS: usize        = 64;
+const ROWS: usize           = 32;
+const SLEEP_TIME: u64       = 1;
+const RAM_SIZE: usize       = 4096;
+const REGISTER_SIZE: usize  = 16;
+const STACK_SIZE: usize     = 24;
+const PROGRAMM_START: u16   = 0x200;
+const WHITE: u32            = 0xFFFFFF;
+const BLACK: u32            = 0x000000;
 
 pub struct Chip8 {
     ram: [u8; 4096],
     pub stack: VecDeque<u16>,
     register: [u8; 16],
     i: u16,
-    display_buffer: [u8; ROWS * COLUMNS],
     window_buffer: Vec<u32>,
     window: Window,
     pub pc: u16,
@@ -44,7 +43,6 @@ impl Chip8 {
             stack: VecDeque::with_capacity(STACK_SIZE),
             register: [0; REGISTER_SIZE],
             i: 0,
-            display_buffer: [0; ROWS * COLUMNS],
             window_buffer: vec![0; COLUMNS * ROWS],
             window: win,
             pc: 0,
@@ -96,41 +94,6 @@ impl Chip8 {
             self.delay_timer -= 1;
         }
     }
-
-    // Debug Display
-    pub fn write_sprite(&mut self, sprite: &u8, x: u8, y: u8) {
-        let columns: usize = 64;
-        let mask = 0b0000001;
-        for i in 0..8 {
-            if sprite >> i  & mask == 0b1 {
-                self.display_buffer[(x as usize) * columns + (y as usize + i)] = 1;
-            } else {
-                self.display_buffer[(x as usize) * columns + (y as usize + i)] = 0;
-            }
-        }
-    }
-
-
-    pub fn read_display_buffer(&self, x: u8, y:u8) -> u8 {
-        let x = self.read_register(x) as usize;
-        let y = self.read_register(y)  as usize;
-        self.display_buffer[x * COLUMNS + y]
-    }
-
-    pub fn print_display_buffer(&self) {
-        for x in 0..ROWS {
-            for y in 0..COLUMNS {
-                let bit = self.display_buffer[x * COLUMNS + y];
-                if bit == 0b1 {
-                    print!("*");
-                } else {
-                    print!("_");
-                }
-            }
-            print!("\n");        
-        }
-    }
-
 
     // Display
     pub fn clear_window(&mut self) {
