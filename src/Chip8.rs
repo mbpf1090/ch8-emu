@@ -142,21 +142,26 @@ impl Chip8 {
         }
     }
 
+    fn get_index(x: u8, y: u8) -> usize {
+        x as usize * COLUMNS + y as usize
+    }
+
     pub fn write_sprite_to_window(&mut self, sprite: &u8, x: u8, y: u8) {
         let mask = 0b0000001;
         let mut swapped: u8 = 0b0;
-        
+
         for i in (0..8).rev() {
             let bit = (sprite >> i & mask) as u32;
-            let window_bit = self.window_buffer[(x as usize) * COLUMNS + (y as usize + 7 - i)] as u32;
-            
+            let index = Chip8::get_index(x, y + 7 - i);
+            let window_bit = self.window_buffer[index];
+
             if (bit == 1) & (window_bit == 1) {
-                self.window_buffer[(x as usize) * COLUMNS + (y as usize + 7 - i)] = 0x000000;
+                self.window_buffer[index] = 0x000000;
                 swapped = 0b1;
             } else if bit == 1 {
-                self.window_buffer[(x as usize) * COLUMNS + (y as usize + 7 - i)] = 0xFFFFFF;
+                self.window_buffer[index] = 0xFFFFFF;
             } else {
-                self.window_buffer[(x as usize) * COLUMNS + (y as usize + 7 - i)] = 0x000000;
+                self.window_buffer[index ] = 0x000000;
             }
         }
         self.write_register(0xF, swapped);
