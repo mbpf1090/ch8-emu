@@ -26,6 +26,7 @@ pub struct Chip8 {
     window: Window,
     pub pc: u16,
     delay_timer: u8,
+    key: u8,
 }
 
 impl Chip8 {
@@ -47,6 +48,7 @@ impl Chip8 {
             window: win,
             pc: 0,
             delay_timer: 0,
+            key: 0xFF_u8,
         }
     }
 
@@ -109,77 +111,90 @@ impl Chip8 {
     pub fn write_sprite_to_window(&mut self, sprite: &u8, x: u8, y: u8) {
         let mask = 0b0000001;
         let mut swapped: u8 = 0b0;
+        let x = x % ROWS as u8;
+        let y = y % COLUMNS as u8;
 
         for i in (0..8).rev() {
             let bit = (sprite >> i & mask) as u32;
             let index = Chip8::get_index(x, y + 7 - i);
-            let window_bit = self.window_buffer[index];
+            let window_bit = self.window_buffer[index] & 0x1;
+            //println!("Drawing bit {} at x {} y {} with widnow bit set to {}", bit, x, y + 7 - i, window_bit);
+            //if y + 7 - i > COLUMNS as u8 {
+            //    println!("Wrapped at y = {} i = {}", y, i);
+            //    continue;
+            //}
 
-            if (bit == 1) && (window_bit == 1) {
-                self.window_buffer[index] = BLACK;
-                swapped = 0b1;
-            } else if bit == 1 {
-                self.window_buffer[index] = WHITE;
-            } else {
-                self.window_buffer[index ] = BLACK;
-            }
+            let pixel = bit ^ window_bit;
+            self.window_buffer[index] = match pixel {
+                0 => BLACK,
+                1 => WHITE,
+                _ => unreachable!()
+            };
+            swapped = pixel as u8;
         }
         self.write_register(0xF, swapped);
     }
 
     // Keyboard
-    pub fn get_key(&self) -> u8 {
-        let mut key = 0xFF_u8;
-        self.window.get_keys().map(|keys| {
+    fn read_key(&mut self) {
+        self.window.get_keys_pressed(KeyRepeat::Yes).map(|keys| {
             for t in keys {
                 match t {
-                    Key::Key4 => {key = 0x1},
-                    Key::Key5 => {key = 0x2},
-                    Key::Key6 => {key = 0x3},
-                    Key::Key7 => {key = 0xC},
-                    Key::R => {key = 0x4},
-                    Key::T => {key = 0x5},
-                    Key::Z => {key = 0x6},
-                    Key::U => {key = 0xD},
-                    Key::F => {key = 0x7},
-                    Key::G => {key = 0x8},
-                    Key::H => {key = 0x9},
-                    Key::J => {key = 0xE},
-                    Key::V => {key = 0xA},
-                    Key::B => {key = 0x0},
-                    Key::N => {key = 0xB},
-                    Key::M => {key = 0xF},
+                    Key::Key4 => {self.key = 0x1},
+                    Key::Key5 => {self.key = 0x2},
+                    Key::Key6 => {self.key = 0x3},
+                    Key::Key7 => {self.key = 0xC},
+                    Key::R => {self.key = 0x4},
+                    Key::T => {self.key = 0x5},
+                    Key::Y => {self.key = 0x6},
+                    Key::U => {self.key = 0xD},
+                    Key::F => {self.key = 0x7},
+                    Key::G => {self.key = 0x8},
+                    Key::H => {self.key = 0x9},
+                    Key::J => {self.key = 0xE},
+                    Key::V => {self.key = 0xA},
+                    Key::B => {self.key = 0x0},
+                    Key::N => {self.key = 0xB},
+                    Key::M => {self.key = 0xF},
                     _ => (),
                 }
             }
         });
-        key
+    }
+
+    pub fn get_key(&self) -> u8 {
+        self.key
+    }
+
+    pub fn reset_key(&mut self) {
+        self.key = 0xFF;
     }
 
     // Run
     pub fn run(&mut self) {
-        let debug = true;
+        let debug = false;
         let sleep_time = time::Duration::from_millis(SLEEP_TIME);
         self.pc = PROGRAMM_START;
         if debug {
             while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
-                self.window.update_with_buffer(&self.window_buffer).unwrap();
                 if self.window.is_key_pressed(Key::W, KeyRepeat::Yes) {
+                    self.read_key();
                     let chunks: [u8; 2] = [self.ram[(self.pc as usize)], self.ram[(self.pc as usize + 1)]];
                     opcode_instructions::run_opcode(&chunks, self);
                     self.delay_timer_tick();
                     println!("{:?}", self);
                     thread::sleep(sleep_time);
                 }
+                self.window.update_with_buffer(&self.window_buffer).unwrap();
             }
         } else {
             while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
+                self.read_key();
+                let chunks: [u8; 2] = [self.ram[(self.pc as usize)], self.ram[(self.pc as usize + 1)]];
+                opcode_instructions::run_opcode(&chunks, self);
+                self.delay_timer_tick();
+                thread::sleep(sleep_time);
                 self.window.update_with_buffer(&self.window_buffer).unwrap();
-                
-                    let chunks: [u8; 2] = [self.ram[(self.pc as usize)], self.ram[(self.pc as usize + 1)]];
-                    opcode_instructions::run_opcode(&chunks, self);
-                    self.delay_timer_tick();
-                    thread::sleep(sleep_time);
             }
         }
     }

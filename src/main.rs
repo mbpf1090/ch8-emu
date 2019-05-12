@@ -44,9 +44,7 @@ fn main() {
     //load rom into memory
     for (index, item) in rom.iter().enumerate() {
         chip8.write_ram(0x200 + index as u16,  *item);
-    }
-    
-    println!("{:?}", chip8);   
+    }  
 
     // run instructions
     chip8.run()
