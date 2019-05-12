@@ -215,7 +215,10 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                         },
                         0x0A => {
                                 //IMPLEMENT KEYBOARD Blocking
-                                println!("unimplemented blocking key");
+                                println!("Blocking key");
+                                while chip8.get_key() == 0xFF {
+                                        chip8.pc += 0;
+                                }
                                 chip8.pc += 2;
                         },
                         0x15 => {
@@ -262,6 +265,7 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                                                 println!("Write to register {} with data {}", x, data);
                                                 chip8.write_register(i, data);
                                         }
+                                        // HMM?!
                                         //chip8.write_i(start_address + x as u16 + 1);
                                         chip8.pc += 2;
                         },

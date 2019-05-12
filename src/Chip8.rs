@@ -127,8 +127,9 @@ impl Chip8 {
         self.write_register(0xF, swapped);
     }
 
+    // Keyboard
     pub fn get_key(&self) -> u8 {
-        let mut key = 0_u8;
+        let mut key = 0xFF_u8;
         self.window.get_keys().map(|keys| {
             for t in keys {
                 match t {
