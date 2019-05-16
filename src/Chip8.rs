@@ -31,7 +31,7 @@ pub struct Chip8 {
 
 impl Chip8 {
     pub fn new() -> Chip8{
-        let win = Window::new("Test - ESC to exit",
+        let win = Window::new("Chip-8 - ESC to exit",
                                  COLUMNS,
                                  ROWS,
                                  WindowOptions {
@@ -102,6 +102,7 @@ impl Chip8 {
         for pixel in 0..self.window_buffer.len() {
             self.window_buffer[pixel] = 0;
         }
+         self.window.update_with_buffer(&self.window_buffer).unwrap();
     }
 
     fn get_index(x: u8, y: u8) -> usize {
@@ -116,13 +117,13 @@ impl Chip8 {
 
         for i in (0..8).rev() {
             let bit = (sprite >> i & mask) as u32;
+            if y + 7 - i >= COLUMNS as u8 {
+                //println!("Wrapped at y = {} i = {}", y, i);
+                continue;
+            }
             let index = Chip8::get_index(x, y + 7 - i);
             let window_bit = self.window_buffer[index] & 0x1;
             //println!("Drawing bit {} at x {} y {} with widnow bit set to {}", bit, x, y + 7 - i, window_bit);
-            //if y + 7 - i > COLUMNS as u8 {
-            //    println!("Wrapped at y = {} i = {}", y, i);
-            //    continue;
-            //}
 
             let pixel = bit ^ window_bit;
             self.window_buffer[index] = match pixel {
@@ -133,11 +134,13 @@ impl Chip8 {
             swapped = pixel as u8;
         }
         self.write_register(0xF, swapped);
+        self.window.update_with_buffer(&self.window_buffer).unwrap();
     }
 
     // Keyboard
     fn read_key(&mut self) {
-        self.window.get_keys_pressed(KeyRepeat::Yes).map(|keys| {
+        self.window.get_keys_pressed(KeyRepeat::No).map(|keys| {
+        //self.window.get_keys().map(|keys| {
             for t in keys {
                 match t {
                     Key::Key4 => {self.key = 0x1},
@@ -156,7 +159,7 @@ impl Chip8 {
                     Key::B => {self.key = 0x0},
                     Key::N => {self.key = 0xB},
                     Key::M => {self.key = 0xF},
-                    _ => (),
+                    _ => {self.key = 0xFF},
                 }
             }
         });
@@ -194,7 +197,7 @@ impl Chip8 {
                 opcode_instructions::run_opcode(&chunks, self);
                 self.delay_timer_tick();
                 thread::sleep(sleep_time);
-                self.window.update_with_buffer(&self.window_buffer).unwrap();
+                self.window.update();
             }
         }
     }
