@@ -98,6 +98,10 @@ impl Chip8 {
     }
 
     // Display
+    pub fn update_window(&mut self) {
+        self.window.update_with_buffer(&self.window_buffer).unwrap();
+    }
+
     pub fn clear_window(&mut self) {
         for pixel in 0..self.window_buffer.len() {
             self.window_buffer[pixel] = 0;
@@ -110,47 +114,32 @@ impl Chip8 {
     }
 
     pub fn write_sprite_to_window(&mut self, sprite: &u8, x: u8, y: u8) -> u8{
-        let mask = 0b000_0001;
         let mut swapped: u8 = 0b0;
-        let x = x % ROWS as u8;
-        let y = y % COLUMNS as u8;
-
-
 
         for i in 0..8 {
             let bit = (*sprite << i & 0b1000_0000) >> 7;
-            //let foo = (sprite >> i & mask) as u32;
-            //if y + i >= COLUMNS as u8 {
-            //    continue;
-            //}
-            let index = Chip8::get_index(x, y + i);
-            //let index = Chip8::get_index(x, y + 7 - i);
-            let window_bit = (self.window_buffer[index] & 0x1) as u8;
             //println!("Drawing bit {} at x {} y {} with widnow bit set to {}", bit, x, y + 7 - i, window_bit);
 
-
-            if (window_bit == 1) && (bit == 1) {
-                swapped = 0b1;
-                //self.write_register(0xF, swapped);
-            }
-            if bit != 0_u8 {
-                let pixel: u8 = bit ^ window_bit;
+            if bit == 1 {
+                let index = Chip8::get_index(x, (y + i) % COLUMNS as u8);
+                let window_bit = (self.window_buffer[index] & 0x1) as u8;
+                if window_bit == 1 {
+                    swapped = 1
+                }
+                let pixel = bit ^ window_bit;
                 self.window_buffer[index] = match pixel {
                     0 => BLACK,
                     1 => WHITE,
                     _ => unreachable!()
                 };
-
             }
         }
-        self.window.update_with_buffer(&self.window_buffer).unwrap();
         swapped
     }
 
     // Keyboard
     fn read_key(&mut self) {
         self.window.get_keys_pressed(KeyRepeat::No).map(|keys| {
-        //self.window.get_keys().map(|keys| {
             for t in keys {
                 match t {
                     Key::Key4 => {self.key = 0x1},
@@ -198,7 +187,7 @@ impl Chip8 {
                     println!("{:?}", self);
                     thread::sleep(sleep_time);
                 }
-                self.window.update_with_buffer(&self.window_buffer).unwrap();
+                self.window.update();
             }
         } else {
             while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
