@@ -18,9 +18,9 @@ const WHITE: u32            = 0xFFFFFF;
 const BLACK: u32            = 0x000000;
 
 pub struct Chip8 {
-    ram: [u8; 4096],
+    ram: [u8; RAM_SIZE],
     pub stack: VecDeque<u16>,
-    register: [u8; 16],
+    register: [u8; REGISTER_SIZE],
     i: u16,
     window_buffer: Vec<u32>,
     window: Window,
@@ -109,32 +109,42 @@ impl Chip8 {
         x as usize * COLUMNS + y as usize
     }
 
-    pub fn write_sprite_to_window(&mut self, sprite: &u8, x: u8, y: u8) {
-        let mask = 0b0000001;
+    pub fn write_sprite_to_window(&mut self, sprite: &u8, x: u8, y: u8) -> u8{
+        let mask = 0b000_0001;
         let mut swapped: u8 = 0b0;
         let x = x % ROWS as u8;
         let y = y % COLUMNS as u8;
 
-        for i in (0..8).rev() {
-            let bit = (sprite >> i & mask) as u32;
-            if y + 7 - i >= COLUMNS as u8 {
-                //println!("Wrapped at y = {} i = {}", y, i);
-                continue;
-            }
-            let index = Chip8::get_index(x, y + 7 - i);
-            let window_bit = self.window_buffer[index] & 0x1;
+
+
+        for i in 0..8 {
+            let bit = (*sprite << i & 0b1000_0000) >> 7;
+            //let foo = (sprite >> i & mask) as u32;
+            //if y + i >= COLUMNS as u8 {
+            //    continue;
+            //}
+            let index = Chip8::get_index(x, y + i);
+            //let index = Chip8::get_index(x, y + 7 - i);
+            let window_bit = (self.window_buffer[index] & 0x1) as u8;
             //println!("Drawing bit {} at x {} y {} with widnow bit set to {}", bit, x, y + 7 - i, window_bit);
 
-            let pixel = bit ^ window_bit;
-            self.window_buffer[index] = match pixel {
-                0 => BLACK,
-                1 => WHITE,
-                _ => unreachable!()
-            };
-            swapped = pixel as u8;
+
+            if (window_bit == 1) && (bit == 1) {
+                swapped = 0b1;
+                //self.write_register(0xF, swapped);
+            }
+            if bit != 0_u8 {
+                let pixel: u8 = bit ^ window_bit;
+                self.window_buffer[index] = match pixel {
+                    0 => BLACK,
+                    1 => WHITE,
+                    _ => unreachable!()
+                };
+
+            }
         }
-        self.write_register(0xF, swapped);
         self.window.update_with_buffer(&self.window_buffer).unwrap();
+        swapped
     }
 
     // Keyboard

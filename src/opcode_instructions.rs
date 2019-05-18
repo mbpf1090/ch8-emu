@@ -164,13 +164,16 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                                 let i = chip8.read_i();
                                 let x = chip8.read_register(x);
                                 let mut y = chip8.read_register(y);
-                                //println!("Draw sprite at {:02X} at x: {} y: {}", i, y, x);
+                                let mut swapped: u8 = 0b0;
+                                println!("Printing Sprite at x:{} y:{}", x, y);
                                 for address in i..i + n as u16 {
                                         let sprite = chip8.read_ram(address);
-                                        //println!("Sprite: {:08b}", sprite);
-                                        chip8.write_sprite_to_window(&sprite, y, x);
+                                        println!("Sprite: {:08b}", sprite);
+                                        swapped = chip8.write_sprite_to_window(&sprite, y, x);
                                         y += 1;
                                 }
+                                chip8.write_register(0xF, swapped);
+                                println!("Swapped: {:b}", swapped);
                                 chip8.pc += 2;
                         },
                 0xE => match chunk[1] {
@@ -248,7 +251,13 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                                         chip8.write_ram(chip8.read_i() + 2, s);
                                         chip8.pc += 2;
                         },
-                        0x55 => panic!("unimplemented"),
+                        0x55 => {
+                                        //Store registers V0 through Vx in memory starting at location I.
+                                        for i in 0..=x {
+                                                chip8.write_ram(chip8.read_i() + i as u16, chip8.read_register(i));
+                                        }
+                                        chip8.pc += 2;
+                        },
                         0x65 => {       
 
                                         let start_address = chip8.read_i();
