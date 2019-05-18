@@ -17,6 +17,7 @@ const PROGRAMM_START: u16   = 0x200;
 const WHITE: u32            = 0xFFFFFF;
 const BLACK: u32            = 0x000000;
 
+
 pub struct Chip8 {
     ram: [u8; RAM_SIZE],
     pub stack: VecDeque<u16>,
@@ -27,6 +28,7 @@ pub struct Chip8 {
     pub pc: u16,
     delay_timer: u8,
     key: u8,
+    keys: [u8; 16],
 }
 
 impl Chip8 {
@@ -49,6 +51,7 @@ impl Chip8 {
             pc: 0,
             delay_timer: 0,
             key: 0xFF_u8,
+            keys: [0; 16],
         }
     }
 
@@ -118,13 +121,14 @@ impl Chip8 {
 
         for i in 0..8 {
             let bit = (*sprite << i & 0b1000_0000) >> 7;
-            //println!("Drawing bit {} at x {} y {} with widnow bit set to {}", bit, x, y + 7 - i, window_bit);
 
             if bit == 1 {
                 let index = Chip8::get_index(x, (y + i) % COLUMNS as u8);
                 let window_bit = (self.window_buffer[index] & 0x1) as u8;
                 if window_bit == 1 {
-                    swapped = 1
+                    swapped = 1;
+                } else {
+                    swapped = 0;
                 }
                 let pixel = bit ^ window_bit;
                 self.window_buffer[index] = match pixel {
@@ -142,34 +146,64 @@ impl Chip8 {
         self.window.get_keys_pressed(KeyRepeat::No).map(|keys| {
             for t in keys {
                 match t {
-                    Key::Key4 => {self.key = 0x1},
-                    Key::Key5 => {self.key = 0x2},
-                    Key::Key6 => {self.key = 0x3},
-                    Key::Key7 => {self.key = 0xC},
-                    Key::R => {self.key = 0x4},
-                    Key::T => {self.key = 0x5},
-                    Key::Y => {self.key = 0x6},
-                    Key::U => {self.key = 0xD},
-                    Key::F => {self.key = 0x7},
-                    Key::G => {self.key = 0x8},
-                    Key::H => {self.key = 0x9},
-                    Key::J => {self.key = 0xE},
-                    Key::V => {self.key = 0xA},
-                    Key::B => {self.key = 0x0},
-                    Key::N => {self.key = 0xB},
-                    Key::M => {self.key = 0xF},
-                    _ => {self.key = 0xFF},
+                    Key::Key4 => {self.set_keys(0x1)},
+                    Key::Key5 => {self.set_keys(0x2)},
+                    Key::Key6 => {self.set_keys(0x3)},
+                    Key::Key7 => {self.set_keys(0xC)},
+                    Key::R => {self.set_keys(0x4)},
+                    Key::T => {self.set_keys(0x5)},
+                    Key::Y => {self.set_keys(0x6)},
+                    Key::U => {self.set_keys(0xD)},
+                    Key::F => {self.set_keys(0x7)},
+                    Key::G => {self.set_keys(0x8)},
+                    Key::H => {self.set_keys(0x9)},
+                    Key::J => {self.set_keys(0xE)},
+                    Key::V => {self.set_keys(0xA)},
+                    Key::B => {self.set_keys(0x0)},
+                    Key::N => {self.set_keys(0xB)},
+                    Key::M => {self.set_keys(0xB)},
+                    _ => (),
                 }
             }
         });
     }
 
-    pub fn get_key(&self) -> u8 {
-        self.key
+    pub fn set_keys(&mut self, key: usize) {
+        self.keys[key] = 1;
     }
 
-    pub fn reset_key(&mut self) {
-        self.key = 0xFF;
+    pub fn reset_keys(&mut self) {
+        let keys = [Key::Key4, Key::Key5, Key::Key6, Key::Key7, Key::R, Key::T,
+                    Key::Y, Key::U, Key::F, Key::G, Key::H, Key::J, Key::V,
+                    Key::B, Key::N, Key::M];
+
+        for key in keys.iter() {
+            if self.window.is_key_released(*key) {
+                match key {
+                    Key::Key4 => {self.keys[0x1] = 0},
+                    Key::Key5 => {self.keys[0x2] = 0},
+                    Key::Key6 => {self.keys[0x3] = 0},
+                    Key::Key7 => {self.keys[0xC] = 0},
+                    Key::R => {self.keys[0x4] = 0},
+                    Key::T => {self.keys[0x5] = 0},
+                    Key::Y => {self.keys[0x6] = 0},
+                    Key::U => {self.keys[0xD] = 0},
+                    Key::F => {self.keys[0x7] = 0},
+                    Key::G => {self.keys[0x8] = 0},
+                    Key::H => {self.keys[0x9] = 0},
+                    Key::J => {self.keys[0xE] = 0},
+                    Key::V => {self.keys[0xA] = 0},
+                    Key::B => {self.keys[0x0] = 0},
+                    Key::N => {self.keys[0xB] = 0},
+                    Key::M => {self.keys[0xB] = 0},
+                    _ => (),
+                }
+            }
+        }
+    }
+
+    pub fn get_keys(&self, key: u8) -> u8 {
+        self.keys[key as usize]
     }
 
     // Run
@@ -185,18 +219,23 @@ impl Chip8 {
                     opcode_instructions::run_opcode(&chunks, self);
                     self.delay_timer_tick();
                     println!("{:?}", self);
+                    self.window.update();
                     thread::sleep(sleep_time);
+                    self.reset_keys();
                 }
                 self.window.update();
             }
         } else {
             while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
+                
                 self.read_key();
                 let chunks: [u8; 2] = [self.ram[(self.pc as usize)], self.ram[(self.pc as usize + 1)]];
                 opcode_instructions::run_opcode(&chunks, self);
                 self.delay_timer_tick();
-                thread::sleep(sleep_time);
+                println!("{:?}", self);
                 self.window.update();
+                self.reset_keys();
+                thread::sleep(sleep_time);
             }
         }
     }
@@ -214,6 +253,17 @@ impl fmt::Debug for Chip8 {
         writeln!(f, "")?;
         //Registers
         for item in self.register.iter() {
+            write!(f, "{:02X} ", item)?;
+        }
+        writeln!(f, "")?;
+        //Header for Keys
+        writeln!(f, "Keys: ")?;
+        for i in 0..self.keys.len() {
+            write!(f, "{:02X} ", i)?;
+        }
+        writeln!(f, "")?;
+        //Keys
+        for item in self.keys.iter() {
             write!(f, "{:02X} ", item)?;
         }
         writeln!(f, "")?;

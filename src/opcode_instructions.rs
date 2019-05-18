@@ -167,8 +167,11 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                                 let mut swapped: u8 = 0b0;
                                 for address in i..i + n as u16 {
                                         let sprite = chip8.read_ram(address);
-                                        swapped = chip8.write_sprite_to_window(&sprite, y, x);
-                                        y += 1;
+                                        let local_swapped = chip8.write_sprite_to_window(&sprite, y, x);
+                                        if local_swapped == 1 {
+                                                swapped = 0b1;
+                                        }
+                                        y = (y + 1) % 32;
                                 }
                                 if swapped == 1 {
                                         chip8.write_register(0xF, 1);
@@ -182,27 +185,27 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                         0x9E => {
                                 //println!("Skip next instruction if key in register {} with value of {} is pressed", x, chip8.read_register(x));
                                 //println!("{:?}", chip8);
-                                let key = chip8.get_key();
-                                println!("Key: pressed {}", key);
-                                if key == chip8.read_register(x){
+                                let key = chip8.read_register(x);
+                                //println!("Key: pressed {}", key);
+                                if chip8.get_keys(key) == 1 {
                                         chip8.pc += 4;
                                 } else {
                                         chip8.pc += 2;
                                 }
-                                //chip8.reset_key();
+                                chip8.reset_keys();
                         },
                         0xA1 => {
                                 //println!("Keyboard function not implemented");
                                 //println!("Skip next instruction if key in register {} with value of {} not pressed", x, chip8.read_register(x));
                                 //println!("{:?}", chip8);
-                                let key = chip8.get_key();
-                                println!("Key: pressed {}", key);
-                                if key != chip8.read_register(x){
+                                let key = chip8.read_register(x);
+                                //println!("Key: pressed {}", key);
+                                if chip8.get_keys(key) != 1 {
                                         chip8.pc += 4;
                                 } else {
                                         chip8.pc += 2;
                                 }
-                                //chip8.reset_key();
+                                chip8.reset_keys();
                         },
                         _ => {
                                 panic!("0xE Error {:02X} {:02X}", chunk[0], chunk[1]);
