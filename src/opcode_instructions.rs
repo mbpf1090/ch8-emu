@@ -1,10 +1,11 @@
 use super::chip8;
+use rand::Rng;
 
 pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
-
-    if chunk[0] == 0 && chunk[1] == 0 {
+        let mut rng = rand::thread_rng();
+        if chunk[0] == 0 && chunk[1] == 0 {
                 //println!("EMPTY");
-            }
+        }
             let nnn = (((chunk[0] as u16) << 8) | (chunk[1] as u16)) & 0x0FFF;
             let n = chunk[1] & 0x0F;
             let x = chunk[0] & 0x0F;
@@ -157,7 +158,8 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                 },
                 0xC => {
                         //println!("generate random number to register {:02X}", x);
-                        chip8.write_register(x, 12_u8 & kk);
+                        let rnd = rng.gen_range(0, 255);
+                        chip8.write_register(x, rnd & kk);
                         chip8.pc += 2;
                 },
                 0xD => {

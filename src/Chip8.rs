@@ -149,7 +149,7 @@ impl Chip8 {
 
     // Keyboard
     fn read_key(&mut self) {
-        self.window.get_keys_pressed(KeyRepeat::Yes).map(|keys| {
+        self.window.get_keys_pressed(KeyRepeat::No).map(|keys| {
             for t in keys {
                 match t {
                     Key::Key4 => {self.set_keys(0x1)},
@@ -184,7 +184,7 @@ impl Chip8 {
                     Key::B, Key::N, Key::M];
 
         for key in keys.iter() {
-            if self.window.is_key_released(*key) {
+            if !self.window.is_key_down(*key) {
                 match key {
                     Key::Key4 => {self.keys[0x1] = 0},
                     Key::Key5 => {self.keys[0x2] = 0},
@@ -233,12 +233,10 @@ impl Chip8 {
             }
         } else {
             while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
-                
                 self.read_key();
                 let chunks: [u8; 2] = [self.ram[(self.pc as usize)], self.ram[(self.pc as usize + 1)]];
                 opcode_instructions::run_opcode(&chunks, self);
                 self.delay_timer_tick();
-                println!("{:?}", self);
                 self.window.update();
                 self.reset_keys();
                 thread::sleep(sleep_time);
