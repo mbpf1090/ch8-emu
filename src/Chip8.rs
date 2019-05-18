@@ -3,6 +3,7 @@ extern crate minifb;
 use std::fmt;
 use std::collections::VecDeque;
 use std::{thread, time};
+use std::time::{Duration, Instant};
 use super::opcode_instructions;
 
 use minifb::{Key, WindowOptions, Window, Scale, KeyRepeat};
@@ -29,6 +30,7 @@ pub struct Chip8 {
     delay_timer: u8,
     key: u8,
     keys: [u8; 16],
+    tick_start: Instant,
 }
 
 impl Chip8 {
@@ -52,6 +54,7 @@ impl Chip8 {
             delay_timer: 0,
             key: 0xFF_u8,
             keys: [0; 16],
+            tick_start: Instant::now(),
         }
     }
 
@@ -88,6 +91,7 @@ impl Chip8 {
     // Delay Timer
     pub fn set_delay_timer(&mut self, delay: u8) {
         self.delay_timer = delay;
+        self.tick_start = Instant::now();
     }
 
     pub fn get_delay_timer(&self) -> u8 {
@@ -95,7 +99,9 @@ impl Chip8 {
     }
 
     pub fn delay_timer_tick(&mut self) {
-        if self.delay_timer > 0 {
+        let ten_millis = Duration::from_millis(100);
+        let now = Instant::now();
+        if self.delay_timer > 0 && (now - self.tick_start >= ten_millis) {
             self.delay_timer -= 1;
         }
     }
@@ -143,7 +149,7 @@ impl Chip8 {
 
     // Keyboard
     fn read_key(&mut self) {
-        self.window.get_keys_pressed(KeyRepeat::No).map(|keys| {
+        self.window.get_keys_pressed(KeyRepeat::Yes).map(|keys| {
             for t in keys {
                 match t {
                     Key::Key4 => {self.set_keys(0x1)},
