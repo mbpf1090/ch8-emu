@@ -131,7 +131,7 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                         },
                         0x6 => {
                                 let data = chip8.read_register(x); 
-                                chip8.write_register(0xF, data & 0b00000001);
+                                chip8.write_register(0xF, data & 0b0000_0001);
                                 chip8.write_register(x, data >> 1);
                                 chip8.pc += 2
                         },

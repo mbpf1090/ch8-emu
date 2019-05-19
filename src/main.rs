@@ -28,7 +28,7 @@ fn main() {
             if (debug_flag == "--debug") | (debug_flag == "-d") {
                 true
             } else {
-                false
+                panic!("Unknwon command! Options: --debug or -d!")
             }
         }
         None => false,
