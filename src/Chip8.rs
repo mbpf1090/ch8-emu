@@ -213,10 +213,11 @@ impl Chip8 {
     }
 
     // Run
-    pub fn run(&mut self) {
-        let debug = false;
+    pub fn run(&mut self, debug: bool) {
+        
         let sleep_time = time::Duration::from_millis(SLEEP_TIME);
         self.pc = PROGRAMM_START;
+        
         if debug {
             while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
                 if self.window.is_key_pressed(Key::W, KeyRepeat::Yes) {
