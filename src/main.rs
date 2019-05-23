@@ -41,12 +41,12 @@ fn main() {
     };
 
     let mut chip8 = chip8::Chip8::new();
-
+    
     // load fonts
     let fonts = font::Fonts::new();
     for (index, data) in fonts.fonts.iter().enumerate() {
         // start at 0x05???
-        chip8.write_ram(0x05 + index as u16, *data);
+        chip8.write_ram(0x00 + index as u16, *data);
     }
 
     //load rom into memory

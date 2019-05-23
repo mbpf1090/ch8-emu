@@ -71,7 +71,7 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                         //println!("Write into register {:02X} value {:02X}", x, kk);
                 },
                 0x7 => {
-                        let data = chip8.read_register(x) + kk;
+                        let (data, _) = chip8.read_register(x).overflowing_add(kk);
                         //println!("Set V{:02X} = {} + {}.", x, chip8.read_register(x), kk);
                         chip8.write_register(x, data);
                         chip8.pc += 2;
@@ -108,25 +108,27 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                                 //println!("Set register {:02X} to {:08b} = {:08b} XOR {:08b}.", x, data, x_value, y_value);
                         },
                         0x4 => {
-                                let x_value = chip8.read_register(x) as u16;
-                                let y_value = chip8.read_register(y) as u16;
-                                let data = x_value + y_value;
+                                let x_value = chip8.read_register(x);
+                                let y_value = chip8.read_register(y);
+                                let (data, overflow) = x_value.overflowing_add(y_value);
                                 //println!("Set register {:02X} to value {:02X} = {:02X} + {:02X}", x, data, x_value, y_value);
-                                chip8.write_register(x, data as u8);
-                                if data > 0xFF {
-                                        chip8.write_register(0xF, 1);
+                                chip8.write_register(x, data);
+                                match overflow {
+                                        true => chip8.write_register(0xF, 1),
+                                        false => chip8.write_register(0xF, 0),
                                 }
                                 chip8.pc += 2;
                         },
                         0x5 => {
-                                let x_value = chip8.read_register(x) as i8;
-                                let y_value = chip8.read_register(y) as i8;
-                                let data = x_value - y_value;
-                                if x_value > y_value {
-                                        chip8.write_register(0xF, 1);
+                                let x_value = chip8.read_register(x);
+                                let y_value = chip8.read_register(y);
+                                let (data, overflow) = x_value.overflowing_sub(y_value);
+                                match overflow {
+                                        true => chip8.write_register(0xF, 0),
+                                        false => chip8.write_register(0xF, 1),
                                 }
                                 //println!("Set register {:02X} to value {:02X} = {:02X} - {:02X}", x, data, x_value, y_value);
-                                chip8.write_register(x, data as u8);
+                                chip8.write_register(x, data);
                                 chip8.pc += 2;
                         },
                         0x6 => {
@@ -244,7 +246,8 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                         },
                         0x29 => {
                                 //println!("Set I to font adress of {:02X}", x);
-                                chip8.write_i(x as u16 * 5);
+                                let character = chip8.read_register(x);
+                                chip8.write_i(character as u16 * 5);
                                 chip8.pc += 2;
                         },
                         0x33 => {       
