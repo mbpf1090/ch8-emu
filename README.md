@@ -2,7 +2,7 @@
 
 ## Load roms
 ```
-chip8 romname.ch8
+$./ch8 romname.ch8
 ```
 
 ## Options

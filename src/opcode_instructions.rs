@@ -222,16 +222,13 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                                 chip8.pc += 2;
                         },
                         0x0A => {
-                                //IMPLEMENT KEYBOARD Blocking
                                 //println!("Blocking key");
-                                let key = chip8.read_all_keys();
-                                match key {
-                                        Some(key) => {
+                                if let Some(key) = chip8.read_all_keys() {
                                                 chip8.write_register(x, key);
                                                 chip8.pc += 2;
-                                        },
-                                        None => chip8.pc += 0
-                                        }
+                                } else {
+                                        chip8.pc += 0;
+                                }
                         },
                         0x15 => {
                                 // set delay timer
