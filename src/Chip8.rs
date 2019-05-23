@@ -212,6 +212,15 @@ impl Chip8 {
         self.keys[key as usize]
     }
 
+    pub fn read_all_keys(&self) -> Option<u8> {
+        for i in 0..self.keys.len() {
+            if self.keys[i] != 0 {
+                return Some(self.keys[i]);
+            } 
+        }
+        None
+    }
+
     // Run
     pub fn run(&mut self, debug: bool) {
         
