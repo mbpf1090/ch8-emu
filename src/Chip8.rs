@@ -129,7 +129,7 @@ impl Chip8 {
             let bit = (*sprite << i & 0b1000_0000) >> 7;
 
             if bit == 1 {
-                let index = Chip8::get_index(x, (y + i) % COLUMNS as u8);
+                let index = Chip8::get_index(x % ROWS as u8, (y + i) % COLUMNS as u8);
                 let window_bit = (self.window_buffer[index] & 0x1) as u8;
                 if window_bit == 1 {
                     swapped = 1;
