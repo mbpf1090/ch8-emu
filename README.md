@@ -22,8 +22,9 @@ $./ch8 romname.ch8
 
 
 ## Games
-| Title  | Status  |
-|--------|---------|
+
+| Title  | Status    |
+|:--------|:---------:|
 |15PUZZLE|    😃   |
 |GUESS   |    😃   | 
 |MISSILE |    😟   |
@@ -50,3 +51,4 @@ $./ch8 romname.ch8
 |MERLIN  |    😟   |
 |SYZYGY  |    😟   |
 |VERS    |    😟   |
+
