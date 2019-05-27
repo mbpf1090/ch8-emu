@@ -1,4 +1,6 @@
 /target
 /.vscode
+/GAMES
+/SGAMES
 **/*.rs.bk
 *.ch8

@@ -138,7 +138,12 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                                 chip8.pc += 2
                         },
                         0x7 => panic!("unimplemented"),
-                        0xE => panic!("unimplemented"),
+                        0xE => {
+                                let data = chip8.read_register(x); 
+                                chip8.write_register(0xF, data & 0b1000_0000);
+                                chip8.write_register(x, data << 1);
+                                chip8.pc += 2
+                        },
                         _ => panic!("0x8 ERROR {:02X} {:02X}", chunk[0], chunk[1]),
                 },
                 0x9 => {
