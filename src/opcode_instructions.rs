@@ -137,7 +137,17 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                                 chip8.write_register(x, data >> 1);
                                 chip8.pc += 2
                         },
-                        0x7 => panic!("unimplemented"),
+                        0x7 => {
+                                let x_value = chip8.read_register(x);
+                                let y_value = chip8.read_register(y);
+                                let (data, overflow) = y_value.overflowing_sub(x_value);
+                                match overflow {
+                                        true => chip8.write_register(0xF, 0),
+                                        false => chip8.write_register(0xF, 1),
+                                }
+                                chip8.write_register(x, data);
+                                chip8.pc += 2;
+                        },
                         0xE => {
                                 let data = chip8.read_register(x); 
                                 chip8.write_register(0xF, data & 0b1000_0000);

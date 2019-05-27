@@ -44,11 +44,11 @@ $./ch8 romname.ch8
 |PUZZLE  |    😟   |
 |UFO     |    😃   |
 |BRIX    |    😃   |
-|MAZE    |    😟   |
+|MAZE    |    😃   |
 |SQUASH  |    😃   |
 |VBRIX   |    😟   |
 |CONNECT4|    😟   |
 |MERLIN  |    😟   |
-|SYZYGY  |    😟   |
-|VERS    |    😟   |
+|SYZYGY  |    😃   |
+|VERS    |    😃   |
 
