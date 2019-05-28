@@ -38,7 +38,7 @@ $./ch8 romname.ch8
 |BLITZ   |    😟   | 
 |INVADERS|    😃   |
 |PONG2   |    😃   |
-|TICTAC  |    😟   |
+|TICTAC  |    😃   |
 |BREAKOUT|    😃   |
 |KALEID  |    😟   |
 |PUZZLE  |    😟   |
