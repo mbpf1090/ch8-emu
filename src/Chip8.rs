@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 use std::{thread, time};
 use std::time::{Duration, Instant};
 use super::opcode_instructions;
+use super::opcode;
 
 use minifb::{Key, WindowOptions, Window, Scale, KeyRepeat};
 
@@ -99,10 +100,11 @@ impl Chip8 {
     }
 
     pub fn delay_timer_tick(&mut self) {
-        let ten_millis = Duration::from_millis(100);
+        let ten_millis = Duration::from_millis(17);
         let now = Instant::now();
         if self.delay_timer > 0 && (now - self.tick_start >= ten_millis) {
             self.delay_timer -= 1;
+            self.tick_start = Instant::now();
         }
     }
 
@@ -212,13 +214,28 @@ impl Chip8 {
         self.keys[key as usize]
     }
 
-    pub fn read_all_keys(&self) -> Option<u8> {
+    pub fn read_all_keys(&mut self) -> Option<u8> {
+        self.window.update();
+        self.read_key();
         for i in 0..self.keys.len() {
             if self.keys[i] != 0 {
-                return Some(self.keys[i]);
+                return Some(i as u8);
             } 
         }
         None
+    }
+
+    pub fn blocking_key(&mut self) -> u8 {
+        loop {
+            if let Some(key) = self.read_all_keys() {
+                    return key;
+            } else {
+                    let sleep_time = time::Duration::from_millis(17);
+                    thread::sleep(sleep_time);
+                    self.window.update();
+                    self.reset_keys();
+            }
+        }
     }
 
     // Run
@@ -234,7 +251,9 @@ impl Chip8 {
                     let chunks: [u8; 2] = [self.ram[(self.pc as usize)], self.ram[(self.pc as usize + 1)]];
                     opcode_instructions::run_opcode(&chunks, self);
                     self.delay_timer_tick();
+                    let opcode_debug = opcode::get_opcode(&chunks);
                     println!("{:?}", self);
+                    println!("{}", opcode_debug);
                     self.window.update();
                     thread::sleep(sleep_time);
                     self.reset_keys();

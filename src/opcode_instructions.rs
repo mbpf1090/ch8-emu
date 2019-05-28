@@ -1,5 +1,6 @@
 use super::chip8;
 use rand::Rng;
+use std::{thread, time};
 
 pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
         let mut rng = rand::thread_rng();
@@ -238,12 +239,9 @@ pub fn run_opcode(chunk: &[u8], chip8: &mut chip8::Chip8){
                         },
                         0x0A => {
                                 //println!("Blocking key");
-                                if let Some(key) = chip8.read_all_keys() {
-                                                chip8.write_register(x, key);
-                                                chip8.pc += 2;
-                                } else {
-                                        chip8.pc += 0;
-                                }
+                                let key = chip8.blocking_key();
+                                chip8.write_register(x, key);
+                                chip8.pc += 2;
                         },
                         0x15 => {
                                 // set delay timer

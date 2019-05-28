@@ -48,7 +48,7 @@ $./ch8 romname.ch8
 |SQUASH  |    😃   |
 |VBRIX   |    😟   |
 |CONNECT4|    😟   |
-|MERLIN  |    😟   |
+|MERLIN  |    😃   |
 |SYZYGY  |    😃   |
 |VERS    |    😃   |
 

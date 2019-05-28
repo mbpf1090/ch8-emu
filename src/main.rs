@@ -5,6 +5,7 @@ use std::io::{Error, Read};
 mod chip8;
 mod font;
 mod opcode_instructions;
+mod opcode;
 
 fn read_rom(file_path: &str) -> Result<Vec<u8>, Error> {
     let mut f = File::open(file_path)?;
