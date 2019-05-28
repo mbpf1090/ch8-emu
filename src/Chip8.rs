@@ -232,8 +232,6 @@ impl Chip8 {
             } else {
                     let sleep_time = time::Duration::from_millis(17);
                     thread::sleep(sleep_time);
-                    self.window.update();
-                    self.reset_keys();
             }
         }
     }
