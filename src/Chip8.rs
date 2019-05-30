@@ -4,6 +4,7 @@ use std::fmt;
 use std::collections::VecDeque;
 use std::{thread, time};
 use std::time::{Duration, Instant};
+use std::process;
 use super::opcode_instructions;
 use super::opcode;
 
@@ -227,6 +228,9 @@ impl Chip8 {
 
     pub fn blocking_key(&mut self) -> u8 {
         loop {
+            if self.window.is_key_down(Key::Escape) {
+                std::process::exit(1);
+            }
             if let Some(key) = self.read_all_keys() {
                     return key;
             } else {

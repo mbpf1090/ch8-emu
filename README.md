@@ -25,30 +25,30 @@ $./ch8 romname.ch8
 
 | Title  | Status    |
 |:--------|:---------:|
-|15PUZZLE|    😃   |
-|GUESS   |    😃   | 
-|MISSILE |    😟   |
-|TANK    |    😃   |
-|WALL    |    😃   |
-|BLINKY  |    😃   |
-|HIDDEN  |    😟   |
-|PONG    |    😃   |
-|TETRIS  |    😃   |
-|WIPEOFF |    😃   |
-|BLITZ   |    😟   | 
-|INVADERS|    😃   |
-|PONG2   |    😃   |
-|TICTAC  |    😃   |
-|BREAKOUT|    😃   |
-|KALEID  |    😟   |
-|PUZZLE  |    😟   |
-|UFO     |    😃   |
-|BRIX    |    😃   |
-|MAZE    |    😃   |
-|SQUASH  |    😃   |
-|VBRIX   |    😟   |
-|CONNECT4|    😟   |
-|MERLIN  |    😃   |
-|SYZYGY  |    😃   |
-|VERS    |    😃   |
+|15PUZZLE|    🕹   |
+|GUESS   |    🕹   | 
+|MISSILE |    🛠   |
+|TANK    |    🕹   |
+|WALL    |    🕹   |
+|BLINKY  |    🕹   |
+|HIDDEN  |    🛠   |
+|PONG    |    🕹   |
+|TETRIS  |    🕹   |
+|WIPEOFF |    🕹   |
+|BLITZ   |    🛠   | 
+|INVADERS|    🕹   |
+|PONG2   |    🕹   |
+|TICTAC  |    🕹   |
+|BREAKOUT|    🕹   |
+|KALEID  |    🕹   |
+|PUZZLE  |    🛠   |
+|UFO     |    🕹   |
+|BRIX    |    🕹   |
+|MAZE    |    🕹   |
+|SQUASH  |    🕹   |
+|VBRIX   |    🛠   |
+|CONNECT4|    🛠   |
+|MERLIN  |    🕹   |
+|SYZYGY  |    🕹   |
+|VERS    |    🕹   |
 
